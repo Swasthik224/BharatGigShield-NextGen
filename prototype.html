@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GigShield | Auto-Parametric Claims · Full Voice Control</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1A237E;
+            --accent: #2979FF;
+            --success: #00C853;
+            --danger: #FF3D00;
+            --warning: #FFAB00;
+            --bg: #F4F7FE;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1E21;
+            --text-sub: #70757A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background: var(--bg); color: var(--text-main); line-height: 1.6; }
+
+        /* LOGIN VIEW (role‑aware) */
+        #loginView {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #0D47A1 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-card h1 { font-size: 32px; color: var(--primary); margin-bottom: 10px; letter-spacing: -1px; }
+        .login-card p { color: var(--text-sub); margin-bottom: 30px; font-size: 14px; }
+
+        .input-box {
+            background: #F0F2F5;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .input-box:focus-within { border-color: var(--accent); background: white; }
+        .input-box i { color: var(--text-sub); margin-right: 15px; }
+        .input-box input, .input-box select {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .role-badge {
+            margin: 20px 0 5px;
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        /* dashboard container – all three dashboards */
+        .dashboard {
+            display: none;
+            padding-bottom: 100px;
+        }
+
+        /* common app bar */
+        .app-bar {
+            background: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .user-tag { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 40px; height: 40px; background: #E8EAF6; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-weight: bold; }
+
+        .main-container { max-width: 600px; margin: 20px auto; padding: 0 20px; }
+
+        /* KPI CARD (rider) */
+        .kpi-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #303F9F 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 28px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 30px rgba(26, 35, 126, 0.2);
+            text-align: center;
+        }
+
+        .kpi-card span { font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-card h2 { font-size: 48px; margin: 5px 0; font-weight: 800; }
+
+        /* admin/insurer stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px 10px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .stat-card i { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
+        .stat-card div { font-weight: 700; font-size: 18px; }
+
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .s-card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .s-card h4 { font-size: 13px; color: var(--text-sub); margin-bottom: 10px; }
+        .status-pill { display: inline-block; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; }
+        .active-pill { background: #E8F5E9; color: var(--success); }
+        .cut-pill { background: #FFEBEE; color: var(--danger); }
+
+        .action-title { font-weight: 700; margin-bottom: 15px; font-size: 18px; padding-left: 5px; }
+        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 30px; }
+        .action-btn { background: white; border: none; padding: 15px 5px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .action-btn:active { transform: scale(0.9); background: #F0F2F5; }
+        .action-btn i { font-size: 20px; }
+        .i-rain { color: var(--accent); } .i-heat { color: #F57C00; } .i-pol { color: #78909C; } .i-strike { color: var(--danger); }
+
+        /* Weather monitor panel */
+        .weather-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .weather-item {
+            text-align: center;
+            padding: 10px;
+            background: #F4F7FE;
+            border-radius: 16px;
+        }
+        
+        .weather-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .weather-label {
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+        
+        .trigger-badge {
+            background: var(--warning);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 40px;
+            margin-left: 5px;
+        }
+
+        /* voice hub – now controls EVERYTHING */
+        .voice-hub {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 500px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .mic-trigger {
+            width: 55px;
+            height: 55px;
+            background: var(--primary);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(26,35,126,0.3);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mic-trigger.listening { animation: pulse 1.5s infinite; background: var(--danger); }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 61, 0, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 61, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 61, 0, 0); }
+        }
+
+        .output-text { font-size: 14px; font-weight: 600; color: var(--text-sub); flex-grow: 1; }
+
+        /* LOG SECTION (shared) */
+        .history-section { background: white; border-radius: 28px; padding: 25px; }
+        .history-list { list-style: none; }
+        .history-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #F0F2F5; }
+        .history-item:last-child { border: none; }
+        .history-info b { display: block; font-size: 15px; }
+        .history-info small { color: var(--text-sub); font-size: 12px; }
+        .history-amt { font-weight: 700; color: var(--success); }
+        .history-amt.red { color: var(--danger); }
+
+        .filter-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .filter-tab { background: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 600; color: var(--text-sub); }
+        .filter-tab.active { background: var(--primary); color: white; }
+
+        .admin-table { background: white; border-radius: 28px; padding: 10px; width: 100%; border-collapse: collapse; }
+        .admin-table td, .admin-table th { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .approve-btn { background: var(--success); color: white; border: none; padding: 5px 12px; border-radius: 40px; cursor: pointer; font-size: 12px; }
+
+        /* insurer specific */
+        .provider-header { background: white; border-radius: 28px; padding: 25px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; }
+
+        /* confirmation panel (for cut) */
+        .confirm-panel {
+            background: #fff3cd;
+            border-left: 8px solid #ffc107;
+            border-radius: 40px;
+            padding: 16px 25px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .confirm-panel span { font-weight: 700; }
+        .confirm-actions { display: flex; gap: 12px; }
+        
+        .auto-badge {
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 40px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- LOGIN VIEW (with role selection) -->
+    <div id="loginView">
+        <div class="login-card">
+            <h1>GigShield</h1>
+            <p>AI Parametric · Full Voice Control</p>
+            
+            <div class="input-box">
+                <i class="fa-solid fa-phone"></i>
+                <input type="text" id="mobileInput" placeholder="Mobile / User ID" value="9876543210">
+            </div>
+            
+            <div class="input-box">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="pinInput" placeholder="4-Digit PIN" value="1234">
+            </div>
+
+            <div class="input-box">
+                <i class="fa-solid fa-user-tag"></i>
+                <select id="roleSelect">
+                    <option value="rider">🚴 Rider</option>
+                    <option value="admin">🛡️ Admin</option>
+                    <option value="insurer">🏛️ Insurer</option>
+                </select>
+            </div>
+            
+            <button class="btn-primary" onclick="handleLogin()">Sign In</button>
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">Demo: any mobile + 1234</p>
+        </div>
+    </div>
+
+    <!-- ========== RIDER DASHBOARD ========== -->
+    <div id="riderDashboard" class="dashboard">
+        <div class="app-bar">
+            <div class="user-tag">
+                <div class="avatar" id="riderAvatar">RK</div>
+                <div>
+                    <div style="font-weight: 800; font-size: 16px;" id="riderName">Ravi Kumar</div>
+                    <div style="font-size: 12px; color: var(--text-sub);"><i class="fa-solid fa-location-dot"></i> Hyderabad · Zepto <span class="auto-badge">AUTO-CLAIM</span></div>
+                </div>
+            </div>
+            <button onclick="logout()" style="border:none; background:none; color:var(--text-sub); cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+            </button>
+        </div>
+
+        <div class="main-container">
+            <div class="kpi-card">
+                <span>Income Protected This Week</span>
+                <h2 id="earningDisplay">₹1,200</h2>
+                <div style="font-size: 12px; opacity: 0.7;">Next payout: Instant via UPI</div>
+            </div>
+
+            <!-- Live Weather Monitor (Auto-claim triggers) -->
+            <div class="weather-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-cloud-sun-rain"></i> Live Weather Monitor</span>
+                    <span style="font-size: 12px; color: var(--text-sub);">Auto-claims when thresholds met</span>
+                </div>
+                <div class="weather-grid" id="weatherGrid">
+                    <div class="weather-item">
+                        <div class="weather-value" id="rainValue">32<span style="font-size:12px;">mm</span></div>
+                        <div class="weather-label">Rain <span class="trigger-badge" id="rainTrigger">>25mm</span></div>
+                    </div>
+                    <div class="weather-item">
+                        <div class="weather-value" id="tempValue">41<span style="font-size:12px;">°C</span></div>
+                        <div class="weather-label">Temp <span class="trigger-badge" id="tempTrigger">>40°C</span></div>
+                    </div>
+                    <div class="weather-item">
+                        <div class="weather-value" id="aqiValue">185</div>
+                        <div class="weather-label">AQI <span class="trigger-badge" id="aqiTrigger">>150</span></div>
+                    </div>
+                    <div class="weather-item">
+                        <div class="weather-value" id="strikeValue">No</div>
+                        <div class="weather-label">Strike <span class="trigger-badge">Active</span></div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; color: var(--text-sub); text-align: center;">
+                    ⚡ Auto-trigger: Claims filed automatically when thresholds exceeded
+                </div>
+            </div>
+
+            <div class="status-grid">
+                <div class="s-card">
+                    <h4>Policy Status</h4>
+                    <div id="policyStatusRider" class="status-pill active-pill">ACTIVE ✅</div>
+                </div>
+                <div class="s-card">
+                    <h4>Plan</h4>
+                    <div style="font-weight: 700;">₹25 <span style="font-weight: 400; color: var(--text-sub);">/week</span></div>
+                </div>
+            </div>
+
+            <!-- Manual claim buttons – still here for convenience but auto-claims now active -->
+            <div class="action-title">Manual Claims <span style="font-size:12px; color:var(--text-sub);">(auto also active)</span></div>
+            <div class="quick-actions">
+                <button class="action-btn" onclick="raiseClaim('rain')"><i class="fa-solid fa-cloud-showers-heavy i-rain"></i><small>Rain</small></button>
+                <button class="action-btn" onclick="raiseClaim('heat')"><i class="fa-solid fa-fire i-heat"></i><small>Heat</small></button>
+                <button class="action-btn" onclick="raiseClaim('pollution')"><i class="fa-solid fa-smog i-pol"></i><small>AQI</small></button>
+                <button class="action-btn" onclick="raiseClaim('strike')"><i class="fa-solid fa-hand-fist i-strike"></i><small>Strike</small></button>
+            </div>
+
+            <!-- Simulate weather changes -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button onclick="simulateWeatherChange()" style="flex:1; background: var(--primary); color:white; border:none; padding:12px; border-radius:40px; font-weight:600; cursor:pointer;">
+                    <i class="fa-solid fa-dice"></i> Simulate Weather Change
+                </button>
+            </div>
+
+            <!-- confirmation panel for cut insurance (hidden by default) -->
+            <div id="confirmCutPanel" class="confirm-panel" style="display: none;">
+                <span>⚠️ Confirm cutting insurance? (24h reactivation window)</span>
+                <div class="confirm-actions">
+                    <button class="btn-primary" style="background: var(--success); padding: 8px 20px;" onclick="confirmCut()">✅ Yes</button>
+                    <button style="background: #ccc; border: none; padding: 8px 20px; border-radius: 40px;" onclick="cancelCutRequest()">❌ No</button>
+                </div>
+            </div>
+
+            <!-- rider's personal history (past claims) -->
+            <div class="action-title">📋 My Claim History <span class="auto-badge">AUTO</span></div>
+            <div class="history-section">
+                <ul class="history-list" id="riderHistoryList"></ul>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button onclick="clearRiderHistory()" style="font-size: 12px; color: var(--text-sub); border:none; background:none; cursor:pointer;">Clear History</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- voice hub – controls EVERY action (claims, cut, reactivate, history, admin/insurer actions) -->
+        <div class="voice-hub">
+            <button id="micBtn" class="mic-trigger" onclick="startListening()">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <div class="output-text" id="outputText">Auto-claims active · Tap & say: rain / cut / history</div>
+        </div>
+    </div>
+
+    <!-- ========== ADMIN DASHBOARD ========== -->
+    <div id="adminDashboard" class="dashboard">
+        <div class="app-bar">
+            <div class="user-tag">
+                <div class="avatar">AD</div>
+                <div>
+                    <div style="font-weight: 800; font-size: 16px;">Admin Panel</div>
+                    <div style="font-size: 12px; color: var(--text-sub);">Superuser · all access</div>
+                </div>
+            </div>
+            <button onclick="logout()" style="border:none; background:none; color:var(--text-sub); cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+            </button>
+        </div>
+        <div class="main-container">
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fa-solid fa-users"></i><div>142</div><small>Riders</small></div>
+                <div class="stat-card"><i class="fa-solid fa-file-invoice"></i><div id="claimsTodayCount">28</div><small>Claims today</small></div>
+                <div class="stat-card"><i class="fa-solid fa-indian-rupee-sign"></i><div>₹<span id="payoutsTotal">12.4k</span></div><small>Payouts</small></div>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterAdminClaims('all')">All</button>
+                <button class="filter-tab" onclick="filterAdminClaims('pending')">Pending</button>
+                <button class="filter-tab" onclick="filterAdminClaims('approved')">Approved</button>
+            </div>
+
+            <table class="admin-table" id="adminClaimsTable">
+                <tr><th>Rider</th><th>Type</th><th>Amount</th><th>Status</th><th>Trigger</th></tr>
+                <tr><td>Ravi K.</td><td>Rain</td><td>₹300</td><td>Approved</td><td><span class="auto-badge">AUTO</span></td></tr>
+                <tr><td>Priya S.</td><td>Heat</td><td>₹250</td><td>Approved</td><td><span class="auto-badge">AUTO</span></td></tr>
+                <tr><td>Amit R.</td><td>Strike</td><td>₹280</td><td>Approved</td><td>Manual</td></tr>
+            </table>
+
+            <!-- admin also sees global history -->
+            <div class="action-title" style="margin-top: 25px;">📌 Platform Activity</div>
+            <div class="history-section">
+                <ul class="history-list" id="adminHistoryList"></ul>
+            </div>
+        </div>
+        <!-- same voice hub appears for admin too (can approve by voice) -->
+        <div class="voice-hub">
+            <button id="micBtnAdmin" class="mic-trigger" onclick="startListening()">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <div class="output-text" id="outputTextAdmin">Admin: say "approve", "history"</div>
+        </div>
+    </div>
+
+    <!-- ========== INSURER DASHBOARD ========== -->
+    <div id="insurerDashboard" class="dashboard">
+        <div class="app-bar">
+            <div class="user-tag">
+                <div class="avatar">IC</div>
+                <div>
+                    <div style="font-weight: 800; font-size: 16px;">Insurer Portal</div>
+                    <div style="font-size: 12px; color: var(--text-sub);">CoverCorp</div>
+                </div>
+            </div>
+            <button onclick="logout()" style="border:none; background:none; color:var(--text-sub); cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+            </button>
+        </div>
+        <div class="main-container">
+            <div class="provider-header">
+                <i class="fa-solid fa-building" style="font-size: 40px; color: var(--primary);"></i>
+                <div><h3>CoverCorp Insurance</h3><span style="color: var(--text-sub);">Partner since 2025</span></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fa-solid fa-file-signature"></i><div>87</div><small>Active policies</small></div>
+                <div class="stat-card"><i class="fa-solid fa-clock"></i><div>₹<span id="liabilityAmount">6,200</span></div><small>Liability (week)</small></div>
+                <div class="stat-card"><i class="fa-solid fa-chart-line"></i><div>12%</div><small>Loss ratio</small></div>
+            </div>
+
+            <div class="action-title">📋 Auto-Triggered Claims (parametric)</div>
+            <table class="admin-table" id="insurerClaimsTable">
+                <tr><th>Rider</th><th>Event</th><th>Payout</th><th>Trigger</th></tr>
+                <tr><td>Ravi K.</td><td>🌧 Rain (42mm)</td><td>₹300</td><td><span class="auto-badge">AUTO</span></td></tr>
+                <tr><td>Priya S.</td><td>🔥 Heat (43°C)</td><td>₹250</td><td><span class="auto-badge">AUTO</span></td></tr>
+                <tr><td>Arjun N.</td><td>🚧 Strike</td><td>₹280</td><td>Manual</td></tr>
+            </table>
+
+            <div class="action-title">📌 Recent Payout History</div>
+            <div class="history-section">
+                <ul class="history-list" id="insurerHistoryList"></ul>
+            </div>
+        </div>
+        <!-- voice hub for insurer -->
+        <div class="voice-hub">
+            <button id="micBtnInsurer" class="mic-trigger" onclick="startListening()">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <div class="output-text" id="outputTextInsurer">Insurer: say "payouts", "history"</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- GLOBALS ----------
+    let earnings = 1200;
+    let isPolicyActive = true;
+    let riderHistory = JSON.parse(localStorage.getItem('riderHistory')) || [];
+    let globalHistory = JSON.parse(localStorage.getItem('globalHistory')) || [];
+
+    let pendingCutRequest = false;  // for cut confirmation
+
+    const payouts = { rain: 300, heat: 250, pollution: 200, strike: 280 };
+    
+    // Weather thresholds for auto-claims
+    const thresholds = {
+        rain: 25,      // mm
+        heat: 40,      // °C
+        pollution: 150 // AQI
+    };
+    
+    // Current weather conditions
+    let weather = {
+        rain: 32,
+        temp: 41,
+        aqi: 185,
+        strike: false
+    };
+    
+    // Track which conditions have already triggered to avoid duplicate claims
+    let triggeredConditions = {
+        rain: false,
+        heat: false,
+        pollution: false,
+        strike: false
+    };
+    
+    // Auto-claim check interval
+    let weatherInterval;
+
+    // ---------- LOGIN (role based) ----------
+    function handleLogin() {
+        const pin = document.getElementById('pinInput').value;
+        const role = document.getElementById('roleSelect').value;
+        const mobile = document.getElementById('mobileInput').value;
+
+        if (pin !== "1234") {
+            alert("Invalid PIN (use 1234)");
+            return;
+        }
+
+        document.getElementById('loginView').style.display = 'none';
+
+        if (role === 'rider') {
+            document.getElementById('riderDashboard').style.display = 'block';
+            const nameMap = { '9876543210': 'Ravi Kumar', '9123456789': 'Priya Sharma' };
+            const riderName = nameMap[mobile] || 'Rider ' + mobile.slice(-4);
+            document.getElementById('riderName').innerText = riderName;
+            document.getElementById('riderAvatar').innerText = riderName.split(' ').map(n=>n[0]).join('');
+            renderRiderHistory();
+            updateWeatherDisplay();
+            // Start auto-claim monitoring
+            startWeatherMonitoring();
+        } else if (role === 'admin') {
+            document.getElementById('adminDashboard').style.display = 'block';
+            renderAdminHistory();
+            updateAdminStats();
+        } else if (role === 'insurer') {
+            document.getElementById('insurerDashboard').style.display = 'block';
+            renderInsurerHistory();
+        }
+
+        addGlobalHistoryEntry(`👤 ${role} logged in (${mobile})`, 'login');
+        updateOutput(`Hello ${role}! Auto-claims active. Tap mic & say command.`);
+    }
+
+    function logout() {
+        if (weatherInterval) clearInterval(weatherInterval);
+        location.reload();
+    }
+
+    // ---------- AUTO-CLAIM FUNCTIONS ----------
+    function startWeatherMonitoring() {
+        // Check every 10 seconds for demo (in production would be real-time API)
+        if (weatherInterval) clearInterval(weatherInterval);
+        weatherInterval = setInterval(checkWeatherAndTriggerClaims, 10000);
+    }
+    
+    function checkWeatherAndTriggerClaims() {
+        if (!isPolicyActive) return;
+        
+        // Check rain threshold
+        if (weather.rain >= thresholds.rain && !triggeredConditions.rain) {
+            autoRaiseClaim('rain', weather.rain);
+            triggeredConditions.rain = true;
+        } else if (weather.rain < thresholds.rain) {
+            triggeredConditions.rain = false; // Reset if condition improves
+        }
+        
+        // Check temperature threshold
+        if (weather.temp >= thresholds.heat && !triggeredConditions.heat) {
+            autoRaiseClaim('heat', weather.temp);
+            triggeredConditions.heat = true;
+        } else if (weather.temp < thresholds.heat) {
+            triggeredConditions.heat = false;
+        }
+        
+        // Check AQI threshold
+        if (weather.aqi >= thresholds.pollution && !triggeredConditions.pollution) {
+            autoRaiseClaim('pollution', weather.aqi);
+            triggeredConditions.pollution = true;
+        } else if (weather.aqi < thresholds.pollution) {
+            triggeredConditions.pollution = false;
+        }
+        
+        // Check strike (manual toggle for demo)
+        if (weather.strike && !triggeredConditions.strike) {
+            autoRaiseClaim('strike', null);
+            triggeredConditions.strike = true;
+        } else if (!weather.strike) {
+            triggeredConditions.strike = false;
+        }
+    }
+    
+    function autoRaiseClaim(type, value) {
+        if (!isPolicyActive) {
+            updateOutput(`⛔ Policy inactive. Auto-claim for ${type} blocked.`);
+            return;
+        }
+        
+        const amt = payouts[type];
+        earnings += amt;
+        document.getElementById('earningDisplay').innerText = `₹${earnings.toLocaleString()}`;
+        
+        const valueText = value ? ` (${value}${type==='temp'?'°C':type==='rain'?'mm':''})` : '';
+        updateOutput(`🤖 AUTO-CLAIM: ${type.toUpperCase()}${valueText} · ₹${amt} credited!`);
+        
+        addRiderHistory(`🤖 AUTO: ${type.toUpperCase()}${valueText}`, 'credit', amt);
+        addGlobalHistoryEntry(`Rider auto-claimed ${type}${valueText} · ₹${amt}`, 'claim', amt);
+        
+        // Update admin stats
+        updateAdminStats();
+    }
+    
+    // Original manual claim function (kept for backward compatibility)
+    function raiseClaim(type) {
+        if (!isPolicyActive) {
+            updateOutput(`⛔ Policy inactive. Reactivate first (say 'reactivate').`);
+            return;
+        }
+        const amt = payouts[type];
+        earnings += amt;
+        document.getElementById('earningDisplay').innerText = `₹${earnings.toLocaleString()}`;
+        updateOutput(`✅ MANUAL ${type.toUpperCase()} claim: ₹${amt} credited!`);
+
+        addRiderHistory(`MANUAL: ${type.toUpperCase()} claim`, 'credit', amt);
+        addGlobalHistoryEntry(`Rider manually claimed ${type} · ₹${amt}`, 'claim', amt);
+        updateAdminStats();
+    }
+    
+    function simulateWeatherChange() {
+        // Random weather changes for demo
+        weather = {
+            rain: Math.floor(Math.random() * 50) + 10, // 10-60mm
+            temp: Math.floor(Math.random() * 20) + 30, // 30-50°C
+            aqi: Math.floor(Math.random() * 200) + 50, // 50-250 AQI
+            strike: Math.random() > 0.7 // 30% chance of strike
+        };
+        
+        updateWeatherDisplay();
+        updateOutput(`🌦️ Weather updated: Rain ${weather.rain}mm, Temp ${weather.temp}°C, AQI ${weather.aqi}, Strike ${weather.strike ? 'YES' : 'NO'}`);
+        
+        // Immediately check for triggers
+        checkWeatherAndTriggerClaims();
+    }
+    
+    function updateWeatherDisplay() {
+        document.getElementById('rainValue').innerHTML = `${weather.rain}<span style="font-size:12px;">mm</span>`;
+        document.getElementById('tempValue').innerHTML = `${weather.temp}<span style="font-size:12px;">°C</span>`;
+        document.getElementById('aqiValue').innerText = weather.aqi;
+        document.getElementById('strikeValue').innerText = weather.strike ? 'YES' : 'No';
+        
+        // Highlight if thresholds exceeded
+        document.getElementById('rainTrigger').style.background = weather.rain >= thresholds.rain ? '#00C853' : '#FFAB00';
+        document.getElementById('tempTrigger').style.background = weather.temp >= thresholds.heat ? '#00C853' : '#FFAB00';
+        document.getElementById('aqiTrigger').style.background = weather.aqi >= thresholds.pollution ? '#00C853' : '#FFAB00';
+    }
+    
+    function updateAdminStats() {
+        const claimsToday = document.getElementById('claimsTodayCount');
+        const payoutsTotal = document.getElementById('payoutsTotal');
+        const liabilityAmount = document.getElementById('liabilityAmount');
+        
+        if (claimsToday) {
+            const autoClaims = globalHistory.filter(h => h.text.includes('auto')).length;
+            claimsToday.innerText = autoClaims + 12; // Base + auto
+        }
+        
+        if (payoutsTotal) {
+            const total = globalHistory.reduce((sum, h) => sum + (h.amt || 0), 0);
+            payoutsTotal.innerText = (total / 1000).toFixed(1) + 'k';
+        }
+        
+        if (liabilityAmount) {
+            const total = globalHistory.reduce((sum, h) => sum + (h.amt || 0), 0);
+            liabilityAmount.innerText = total.toLocaleString();
+        }
+    }
+
+    // rider history management
+    function addRiderHistory(title, type, amt = null) {
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        riderHistory.unshift({ title, type, amt, time });
+        localStorage.setItem('riderHistory', JSON.stringify(riderHistory));
+        renderRiderHistory();
+    }
+
+    function renderRiderHistory() {
+        const list = document.getElementById('riderHistoryList');
+        if (!list) return;
+        if (riderHistory.length === 0) {
+            list.innerHTML = `<li style="text-align:center; color:#999; font-size:14px; padding:20px;">No past claims yet</li>`;
+            return;
+        }
+        list.innerHTML = riderHistory.map(item => `
+            <li class="history-item">
+                <div class="history-info">
+                    <b>${item.title}</b>
+                    <small>${item.time} · AI Verified</small>
+                </div>
+                ${item.amt ? `<div class="history-amt">+₹${item.amt}</div>` : ''}
+            </li>
+        `).join('');
+    }
+
+    function clearRiderHistory() {
+        riderHistory = [];
+        localStorage.setItem('riderHistory', JSON.stringify(riderHistory));
+        renderRiderHistory();
+        updateOutput("History cleared.");
+    }
+
+    // ---------- GLOBAL HISTORY (admin & insurer) ----------
+    function addGlobalHistoryEntry(text, type, amt = null) {
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        globalHistory.unshift({ text, type, amt, time });
+        localStorage.setItem('globalHistory', JSON.stringify(globalHistory));
+        renderAdminHistory();
+        renderInsurerHistory();
+    }
+
+    function renderAdminHistory() {
+        const list = document.getElementById('adminHistoryList');
+        if (!list) return;
+        if (globalHistory.length === 0) {
+            list.innerHTML = `<li style="text-align:center; color:#999;">No platform activity</li>`;
+            return;
+        }
+        list.innerHTML = globalHistory.map(item => `
+            <li class="history-item">
+                <div class="history-info"><b>${item.text}</b><small>${item.time}</small></div>
+                ${item.amt ? `<div class="history-amt">₹${item.amt}</div>` : ''}
+            </li>
+        `).join('');
+    }
+
+    function renderInsurerHistory() {
+        const list = document.getElementById('insurerHistoryList');
+        if (!list) return;
+        const claimEvents = globalHistory.filter(e => e.type === 'claim');
+        if (claimEvents.length === 0) {
+            list.innerHTML = `<li style="text-align:center; color:#999;">No claim history</li>`;
+            return;
+        }
+        list.innerHTML = claimEvents.map(item => `
+            <li class="history-item">
+                <div class="history-info"><b>${item.text}</b><small>${item.time}</small></div>
+                <div class="history-amt">${item.amt ? '₹'+item.amt : ''}</div>
+            </li>
+        `).join('');
+    }
+
+    // admin: approve claim (demo)
+    window.approveClaim = function(btn) {
+        btn.parentElement.parentElement.cells[3].innerText = 'Approved';
+        btn.outerHTML = '✅';
+        addGlobalHistoryEntry('Admin approved a claim', 'approve');
+        updateOutput("Claim approved by voice? You can also say 'approve'.");
+    };
+
+    window.filterAdminClaims = function(filter) {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+    };
+
+    // ---------- CUT / REACTIVATE (with confirmation) ----------
+    function requestCutInsurance() {
+        if (!isPolicyActive) {
+            updateOutput("Insurance already cut. Say 'reactivate' if window open.");
+            return;
+        }
+        document.getElementById('confirmCutPanel').style.display = 'flex';
+        pendingCutRequest = true;
+        updateOutput("Please confirm cut (say 'yes' / 'no').");
+    }
+
+    window.confirmCut = function() {
+        if (!pendingCutRequest) return;
+        isPolicyActive = false;
+        document.getElementById('policyStatusRider').className = "status-pill cut-pill";
+        document.getElementById('policyStatusRider').innerText = "INACTIVE ❌";
+        earnings = Math.max(0, earnings - 200);
+        document.getElementById('earningDisplay').innerText = `₹${earnings.toLocaleString()}`;
+        addRiderHistory("Policy cancelled", 'debit', 200);
+        addGlobalHistoryEntry("Rider cut insurance (24h window)", 'debit');
+        updateOutput("❌ Insurance cut. Auto-claims stopped. You have 24h to reactivate.");
+        document.getElementById('confirmCutPanel').style.display = 'none';
+        pendingCutRequest = false;
+    };
+
+    window.cancelCutRequest = function() {
+        document.getElementById('confirmCutPanel').style.display = 'none';
+        pendingCutRequest = false;
+        updateOutput("Cut cancelled.");
+    };
+
+    function reactivateInsurance() {
+        if (isPolicyActive) {
+            updateOutput("Already active.");
+            return;
+        }
+        // For demo, always allow reactivate
+        isPolicyActive = true;
+        document.getElementById('policyStatusRider').className = "status-pill active-pill";
+        document.getElementById('policyStatusRider').innerText = "ACTIVE ✅";
+        earnings += 200;
+        document.getElementById('earningDisplay').innerText = `₹${earnings.toLocaleString()}`;
+        addRiderHistory("Policy reactivated", 'credit', 200);
+        addGlobalHistoryEntry("Rider reactivated insurance", 'reactivate');
+        updateOutput("✅ Insurance reactivated! Auto-claims resumed.");
+    }
+
+    // ---------- VOICE RECOGNITION – FULL CONTROL ----------
+    const recognition = window.SpeechRecognition || window.webkitSpeechRecognition ? new (window.SpeechRecognition || window.webkitSpeechRecognition)() : null;
+    if (recognition) {
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-IN';
+
+        recognition.onstart = () => {
+            document.querySelectorAll('.mic-trigger').forEach(btn => btn.classList.add('listening'));
+            updateOutput("🎤 Listening...");
+        };
+        recognition.onend = () => {
+            document.querySelectorAll('.mic-trigger').forEach(btn => btn.classList.remove('listening'));
+        };
+        recognition.onresult = (e) => {
+            const cmd = e.results[0][0].transcript.toLowerCase();
+            updateOutput(`You said: "${cmd}"`);
+
+            // ----- universal commands (any role) -----
+            if (cmd.includes('history') || cmd.includes('show log')) {
+                updateOutput("📋 Displaying history.");
+                renderRiderHistory();
+                renderAdminHistory();
+                renderInsurerHistory();
+            }
+            else if (cmd.includes('clear history')) {
+                clearRiderHistory();
+                updateOutput("History cleared (rider only)");
+            }
+            else if (cmd.includes('weather') || cmd.includes('simulate')) {
+                simulateWeatherChange();
+            }
+
+            // ----- rider specific -----
+            else if (cmd.includes('rain')) raiseClaim('rain');
+            else if (cmd.includes('heat')) raiseClaim('heat');
+            else if (cmd.includes('pollution') || cmd.includes('aqi')) raiseClaim('pollution');
+            else if (cmd.includes('strike')) raiseClaim('strike');
+            else if (cmd.includes('cut insurance') || cmd.includes('cancel insurance')) {
+                requestCutInsurance();
+            }
+            else if (cmd.includes('reactivate') || cmd.includes('renew')) {
+                reactivateInsurance();
+            }
+            else if (cmd.includes('yes') && pendingCutRequest) {
+                confirmCut();
+            }
+            else if (cmd.includes('no') && pendingCutRequest) {
+                cancelCutRequest();
+            }
+
+            // ----- admin commands -----
+            else if (cmd.includes('approve') || cmd.includes('approve claim')) {
+                // demo: approve first pending row
+                let firstPending = document.querySelector('.approve-btn');
+                if (firstPending) approveClaim(firstPending);
+                else updateOutput("No pending claim to approve.");
+            }
+
+            // ----- insurer commands -----
+            else if (cmd.includes('payouts') || cmd.includes('liability')) {
+                updateOutput(`Total liability: ₹${globalHistory.reduce((sum, h) => sum + (h.amt || 0), 0)}`);
+            }
+
+            else {
+                updateOutput("❌ Command not recognized. Try rain, cut, history, weather...");
+            }
+        };
+        recognition.onerror = () => updateOutput("❌ Mic error.");
+    }
+
+    function startListening() {
+        if (!recognition) { alert("Speech not supported."); return; }
+        recognition.start();
+    }
+
+    function updateOutput(text) {
+        document.querySelectorAll('.output-text').forEach(el => el.innerText = text);
+    }
+
+    window.onload = function() {
+        document.getElementById('loginView').style.display = 'flex';
+        document.querySelectorAll('.dashboard').forEach(d => d.style.display = 'none');
+        if (globalHistory.length === 0) {
+            addGlobalHistoryEntry('Ravi auto-claimed Rain (42mm) · ₹300', 'claim', 300);
+            addGlobalHistoryEntry('Priya auto-claimed Heat (43°C) · ₹250', 'claim', 250);
+        }
+        if (riderHistory.length === 0) {
+            addRiderHistory('🤖 AUTO: Rain protection (42mm)', 'credit', 300);
+            addRiderHistory('🤖 AUTO: Heat wave (43°C)', 'credit', 250);
+        }
+        
+        // Initialize weather display
+        updateWeatherDisplay();
+    };
+</script>
+</body>
+</html>
