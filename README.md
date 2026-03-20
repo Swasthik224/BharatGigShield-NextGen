@@ -100,7 +100,31 @@ Benefit Amount: Fixed hourly compensation based on the median earnings of the ch
 Verification: Multi-factor validation using OpenWeather API (Environmental) + GPS Heatmaps (Social/Crowd activity).
 
 Termination: Policy lapses immediately if the Weekly Premium is not paid or if the AI Fraud Score exceeds the 80% threshold.
-##  8. Roadmap & Pitch
+
+## 8.How GigShield Detects Fraud (The Simple Logic)
+Since GigShield pays out money automatically without a human checking every claim, the AI acts as a Digital Security Guard. It asks three basic questions to ensure Ravi is telling the truth:
+
+1. The "Are You Really There?" Check (GPS Validation)
+The AI looks at Ravi’s location data to make sure he isn't "teleporting."
+
+The Logic: If Ravi reports a road blockage in Gachibowli, but his phone shows he is actually 10km away in a dry, clear zone, the AI flags it.
+
+Anti-Spoofing: It detects if he is using "Fake GPS" apps by analyzing his movement patterns—real riders move at variable speeds; "faked" locations often jump instantly from point A to point B.
+
+2. The "Were You Actually Working?" Check (Activity Sync)
+We only compensate for lost income.
+
+The Logic: If a heavy storm hits at 2:00 PM, the AI checks if Ravi’s delivery app (Zepto/Blinkit) was actually "Online" or if he had been "Offline" all day anyway.
+
+The Filter: If he wasn't planning to work, there is no "loss of income" to protect. This prevents people from claiming payouts on their day off.
+
+3. The "Does Everyone Agree?" Check (Crowdsourced Truth)
+This is the most powerful part of the AI.
+
+The Logic: If Ravi uses Tap-to-Talk to report a "local strike," the AI looks at the "Heatmap" of other riders in the same area.
+
+The Verification: If 50 other GigShield users in the same 1km radius are also stopped or reporting the same issue, Ravi’s claim is instantly verified. If Ravi is the only person out of 500 claiming a strike exists, his "Trust Score" drops.
+##  9. Roadmap & Pitch
 * **Week 1-2:** Ideation, Persona Research, and Foundation.
 * **Week 3-4:** Building the Parametric Engine and Dynamic Pricing.
 * **Week 5-6:** Finalizing Fraud Detection and Instant Payout Simulation.
