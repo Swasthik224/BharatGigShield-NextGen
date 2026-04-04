@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/parametric_insurance?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: manju
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+server:
+  port: 8080
+
+jwt:
+  secret: "gigshield-super-secret-key-must-be-at-least-256-bits-long-for-hs256"
+  expiration-ms: 86400000
+
+trigger:
+  check-cron: "0 */15 * * * *"
+  aqi-threshold: 300
+  rain-threshold-mm: 50.0
+  temp-threshold-celsius: 42.0
+
+app:
+  payout:
+    upi-primary: true
+    retry-max: 3
+
+logging:
+  level:
+    com.paramins: DEBUG
